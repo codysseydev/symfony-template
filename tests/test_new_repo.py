@@ -173,7 +173,9 @@ class NewRepoTest(unittest.TestCase):
                               (["--modules", "Symfony"], {}), (["--modules", "Doctrine"], {}), (["--modules", "Var"], {}),
                               (["--namespace", "Doctrine"], {}), (["--namespace", "Vendor"], {}),
                               (["--date", "yesterday"], {}), ([], {"slug": "Bad Slug"}),
-                              ([], {"name": 'Has "quote"'}), (["--namespace", "Framework"], {})):
+                              ([], {"name": 'Has "quote"'}), ([], {"name": "Bob's Desk"}), ([], {"name": "Fish & Chips"}),
+                              ([], {"name": "A<B"}), ([], {"name": "A>B"}),
+                              ([], {"slug": "a-"}), ([], {"slug": "a--b"}), (["--namespace", "Framework"], {})):
             target = os.path.join(self.tmp.name, "bad")
             r = make(target, extra, **kwargs)
             self.assertEqual(r.returncode, 2, (extra, kwargs, r.stderr))

@@ -13,8 +13,8 @@ The target must be missing or empty. The script fills the tokens, refuses to fin
 
 | Flag | Meaning |
 |------|---------|
-| `--name` | Product name. No double quote, backslash or dollar sign. |
-| `--slug` | Lowercase letters, digits and hyphens. Names the Compose project `<slug>-factory`. |
+| `--name` | Product name. No double quote, backslash, dollar sign, apostrophe, `&`, `<` or `>`. |
+| `--slug` | Lowercase letters, digits and single hyphens, no trailing hyphen. Names the Compose project `<slug>-factory`. |
 | `--pitch` | One line. |
 | `--target` | Directory to create. |
 | `--namespace` | PHP namespace and folder for the product modules. Default: StudlyCase of `--name`. |

@@ -186,10 +186,10 @@ def parse_modules(raw, namespace):
 
 
 def validate(args):
-    if not args.name.strip() or any(c in args.name for c in '"\\$\n\r'):
-        raise InputError("--name must be non-empty and contain no double quote, backslash, dollar sign or newline")
-    if not SLUG_RE.match(args.slug):
-        raise InputError("--slug must be lowercase letters, digits and hyphens, for example sample-product")
+    if not args.name.strip() or any(c in args.name for c in '"\'\\$&<>\n\r'):
+        raise InputError("--name must be non-empty and contain no double quote, apostrophe, backslash, dollar sign, ampersand, less-than or greater-than sign, or newline")
+    if not SLUG_RE.match(args.slug) or args.slug.endswith("-") or "--" in args.slug:
+        raise InputError("--slug must be lowercase letters, digits and single hyphens, with no trailing hyphen, for example sample-product")
     if "\n" in args.pitch or "\r" in args.pitch:
         raise InputError("--pitch must be one line")
     try:
