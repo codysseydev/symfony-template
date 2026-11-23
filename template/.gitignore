@@ -1,0 +1,17 @@
+.DS_Store
+/.env
+/.env.local
+/.env.*.local
+.phpactor.json
+.phpunit.result.cache
+/.phpstan.cache
+/.phpunit.cache
+/.idea
+/.vscode
+/.claude/worktrees
+/auth.json
+/node_modules
+/var/
+/vendor/
+Thumbs.db
+/config/reference.php

@@ -1,0 +1,33 @@
+schema: spec-driven
+
+# Project context shown to AI when creating artifacts.
+context: |
+  {{PRODUCT_NAME}}: {{PRODUCT_PITCH}}
+  Symfony application built as vertical slices. Product code lives in
+  {{PRODUCT_NAMESPACE}}/<Module>/ (one bounded context per module), shared
+  infrastructure in Framework/. Standards are path-scoped rule files in
+  .ai/rules/, indexed by .ai/rules/index.md. The product's decisions,
+  glossary, brief and event model live in the {{PRODUCT_SLUG}}-docs brain
+  vault: read it before proposing a change. Repo-local architecture notes are
+  in docs/. The design procedure for bounded-context placement, aggregates
+  and event-model slices is the /domain-design skill.
+  No em dashes, no filler, no hedging in any artifact.
+
+# Per-artifact rules
+rules:
+  proposal:
+    - Under Impact, name the owning bounded context ({{PRODUCT_NAMESPACE}}
+      module or Framework)
+    - List the ubiquitous-language delta, or state "no new terms"
+  design:
+    - Required sections, Bounded context placement, Integration patterns,
+      Ubiquitous language delta, Event-model slices, Enforcement, ADR test
+    - Include alternatives considered for each decision
+  tasks:
+    - An extraction or move of a bounded context is three commits, git mv,
+      namespace, tooling
+    - Updating the brain vault glossary and the relevant rule files are
+      tasks, not afterthoughts
+  specs:
+    - One capability per bounded context touched
+    - A capability never spans two bounded contexts

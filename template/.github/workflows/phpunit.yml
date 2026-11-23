@@ -1,0 +1,55 @@
+name: PHPUnit tests
+
+on: pull_request
+
+concurrency:
+  group: phpunit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpunit:
+    name: Run PHPUnit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, redis, intl, bcmath, pcntl, zip
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Prepare Symfony application
+        run: |
+          cp .env.ci .env
+          echo "APP_SECRET=$(php -r 'echo bin2hex(random_bytes(16));')" >> .env
+
+      - name: Run tests
+        run: composer test
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: testing
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        # MySQL's first boot takes about 20 seconds on a cold runner. Failures inside
+        # the start period do not count against the retries.
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-start-period=60s
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=3

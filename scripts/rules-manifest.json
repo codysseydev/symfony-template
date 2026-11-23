@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "file": "php-core.md",
+      "source": "kanon/laravel-kanon/references/php-core.md",
+      "paths": [
+        "{{PRODUCT_NAMESPACE}}/**",
+        "Framework/**",
+        "tools/**"
+      ]
+    },
+    {
+      "file": "reliability.md",
+      "source": "kanon/laravel-kanon/references/reliability.md",
+      "paths": [
+        "{{PRODUCT_NAMESPACE}}/**"
+      ]
+    },
+    {
+      "file": "symfony.md",
+      "source": "kanon/symfony-kanon/references/symfony.md",
+      "paths": [
+        "{{PRODUCT_NAMESPACE}}/**",
+        "Framework/**",
+        "config/**"
+      ]
+    }
+  ]
+}

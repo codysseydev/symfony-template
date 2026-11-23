@@ -1,0 +1,15 @@
+providers:
+  docker:
+    exposedByDefault: false
+
+entryPoints:
+  web:
+    address: ":80"
+
+accessLog: {}
+log:
+  level: ERROR
+
+api:
+  dashboard: true
+  insecure: true

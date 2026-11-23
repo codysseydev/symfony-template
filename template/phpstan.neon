@@ -1,0 +1,28 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    # Paths come from modules.php (see phpstan.modules.php).
+    - phpstan.modules.php
+
+services:
+    -
+        class: Tools\PHPStan\QueryBusReturnTypeExtension
+        tags:
+            - phpstan.broker.dynamicMethodReturnTypeExtension
+
+parameters:
+    tmpDir: .phpstan.cache
+
+    # Level 10 is the highest level.
+    level: max
+
+    # phpstan-symfony reads the compiled dev container. `composer phpstan`
+    # warms it up first (bin/console cache:warmup --env=dev).
+    symfony:
+        containerXmlPath: var/cache/dev/Framework_KernelDevDebugContainer.xml
+
+    # Tests are not analysed at level max: assertions over responses are dynamic
+    # by nature. Production code is typed properly.
+    excludePaths:
+        - */Tests/*
+        - tests/*

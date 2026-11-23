@@ -1,0 +1,26 @@
+version: 1
+setup:
+  - name: build
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml build php
+  - name: services
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml up -d --wait mysql
+  - name: install
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer install --no-interaction --no-progress
+  - name: env
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php sh -c "cp -n .env.example .env; grep -q '^APP_SECRET=' .env || echo APP_SECRET=\$(php -r 'echo bin2hex(random_bytes(16));') >> .env"
+  - name: migrate
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+checks:
+  - name: cs
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer cs
+  - name: arkitect
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer arkitect
+  - name: phpstan
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer phpstan
+  - name: rector
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer rector
+  - name: tests
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml run --rm -T --user "$(id -u):$(id -g)" php composer test
+teardown:
+  - name: down
+    run: docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml down -v --remove-orphans

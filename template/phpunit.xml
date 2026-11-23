@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnDeprecation="true"
+         failOnNotice="true"
+         failOnWarning="true"
+         beStrictAboutChangesToGlobalState="false"
+         beStrictAboutOutputDuringTests="false"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+>
+    <testsuites>
+        <!-- Scans the whole namespace folder, so a new module needs no entry here. -->
+        <testsuite name="Modules">
+            <directory>{{PRODUCT_NAMESPACE}}</directory>
+        </testsuite>
+        <testsuite name="Framework">
+            <directory>Framework</directory>
+        </testsuite>
+        <testsuite name="Architecture">
+            <directory>tests/Architecture</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>Framework</directory>
+            <directory>{{PRODUCT_NAMESPACE}}</directory>
+        </include>
+    </source>
+    <php>
+        <ini name="memory_limit" value="1G"/>
+        <server name="KERNEL_CLASS" value="Framework\Kernel"/>
+        <env name="APP_ENV" value="test" force="true"/>
+        <env name="APP_DEBUG" value="0" force="true"/>
+        <env name="MESSENGER_TRANSPORT_DSN" value="in-memory://" force="true"/>
+        <env name="APP_NAME" value="{{PRODUCT_NAME}}" force="true"/>
+        <!-- A throwaway secret for tests only. -->
+        <env name="APP_SECRET" value="testing-secret-for-phpunit-only"/>
+    </php>
+</phpunit>

@@ -1,0 +1,33 @@
+# Used by .factory/recipe.yml only. Standalone (not merged with the dev files),
+# it publishes no host ports and sets no container names, so it never clashes
+# with a running dev stack. Run it with a project name, for example:
+#   docker compose -p {{PRODUCT_SLUG}}-factory -f docker-compose.factory.yml ...
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development-cli
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      # Hides the image banner, which calls whoami and warns for the host user id.
+      SHOW_WELCOME_MESSAGE: "false"
+      HOME: /tmp
+      COMPOSER_HOME: /tmp/composer
+      DATABASE_URL: "mysql://root:root@mysql:3306/testing?serverVersion=8.4&charset=utf8mb4"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testing
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 3s
+      timeout: 5s
+      retries: 30

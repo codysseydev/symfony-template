@@ -1,0 +1,12 @@
+version: 1
+setup: []
+checks:
+  - name: unit
+    run: python3 -m unittest tests.test_new_repo tests.test_sort_imports
+  - name: drift
+    run: python3 -m unittest tests.test_rules_drift
+  - name: gates
+    run: SYMFONY_TEMPLATE_GATES=1 python3 -m unittest tests.test_gates
+teardown:
+  - name: docker
+    run: for p in aardvark-works session-pack-tracker zebra-desk; do docker compose -p $p-factory down -v --remove-orphans >/dev/null 2>&1; done; true

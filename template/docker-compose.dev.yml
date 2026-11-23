@@ -1,0 +1,103 @@
+services:
+  traefik:
+    ports:
+      - "8000:80"
+    networks:
+      {{PRODUCT_SLUG}}:
+        aliases:
+          - {{PRODUCT_SLUG}}.test
+    volumes:
+      # Read-only, so Traefik can listen to container events.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./.infrastructure/conf/traefik/dev/traefik.yml:/traefik.yml:ro
+
+  php:
+    build:
+      target: development
+      args:
+        USER_ID: ${SPIN_USER_ID}
+        GROUP_ID: ${SPIN_GROUP_ID}
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - {{PRODUCT_SLUG}}
+    depends_on:
+      traefik:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.symfony.rule=HostRegexp(`{{PRODUCT_SLUG}}.test`)"
+      - "traefik.http.routers.symfony.entrypoints=web"
+      - "traefik.http.services.symfony.loadbalancer.server.port=8080"
+      - "traefik.http.services.symfony.loadbalancer.server.scheme=http"
+
+  mailpit:
+    image: axllent/mailpit
+    networks:
+      - {{PRODUCT_SLUG}}
+    ports:
+      - "8025:8025"
+
+  mysql:
+    networks:
+      - {{PRODUCT_SLUG}}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-{{PRODUCT_SLUG}}}
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    command: "redis-server --appendonly yes"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${FORWARD_REDIS_PORT:-6379}:6379"
+    networks:
+      - {{PRODUCT_SLUG}}
+
+  # Consumes the async Messenger transport on Redis.
+  queue:
+    build:
+      target: development-cli
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - {{PRODUCT_SLUG}}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: "php bin/console messenger:consume async --time-limit=3600 -vv"
+
+  # Runs the schedule in Framework/Scheduler/MainSchedule.php (transport scheduler_default).
+  scheduler:
+    build:
+      target: development-cli
+    volumes:
+      - .:/var/www/html/
+    networks:
+      - {{PRODUCT_SLUG}}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: "php bin/console messenger:consume scheduler_default -vv"
+
+networks:
+  {{PRODUCT_SLUG}}:
+
+volumes:
+  mysql_data:
+  redis_data:
